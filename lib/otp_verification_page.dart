@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
-import 'otp_verification_page.dart';
+import 'change_password.dart';
 
-class ForgotPasswordPage extends StatefulWidget {
-  const ForgotPasswordPage({super.key});
+class OtpVerificationPage extends StatefulWidget {
+  final String email;
+
+  const OtpVerificationPage({
+    super.key,
+    required this.email,
+  });
 
   @override
-  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+  State<OtpVerificationPage> createState() => _OtpVerificationPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
-  final TextEditingController emailController = TextEditingController();
+class _OtpVerificationPageState extends State<OtpVerificationPage> {
+  final TextEditingController otpController = TextEditingController();
 
   @override
   void dispose() {
-    emailController.dispose();
+    otpController.dispose();
     super.dispose();
   }
 
@@ -26,7 +31,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ================= BLACK HEADER =================
+            // ================= BLACK CURVED HEADER =================
             Container(
               height: size.height * 0.32,
               width: double.infinity,
@@ -40,7 +45,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
+                  // 🔵 LOGO
                   Container(
                     width: 80,
                     height: 80,
@@ -60,7 +65,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   const SizedBox(height: 12),
 
                   const Text(
-                    "Reset Password",
+                    "Verify OTP",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -73,7 +78,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
             const SizedBox(height: 30),
 
-            // ================= CARD =================
+            // ================= WHITE CARD =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Card(
@@ -85,33 +90,50 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
-                      const Text(
-                        "Enter your registered Gmail",
-                        style: TextStyle(
-                          fontSize: 16,
+                      Text(
+                        "OTP sent to\n${widget.email}",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),
-                        textAlign: TextAlign.center,
                       ),
 
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 30),
 
-                      // EMAIL FIELD
+                      // ================= OTP FIELD =================
                       TextField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: otpController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          letterSpacing: 8,
+                          fontWeight: FontWeight.bold,
+                        ),
                         decoration: InputDecoration(
-                          hintText: "Gmail ID",
-                          prefixIcon: const Icon(Icons.email),
+                          counterText: "",
+                          hintText: "------",
+                          prefixIcon: const Icon(Icons.lock_outline),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
 
+                      const SizedBox(height: 10),
+
+                      const Text(
+                        "Resend OTP in 30 seconds",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+
                       const SizedBox(height: 25),
 
-                      // SEND OTP BUTTON
+                      // ================= VERIFY BUTTON =================
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -123,26 +145,24 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                           ),
                           onPressed: () {
-                            if (emailController.text.isEmpty) {
+                            if (otpController.text.length != 6) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text("Enter Gmail ID"),
+                                  content: Text("Enter valid 6-digit OTP"),
                                 ),
                               );
                               return;
                             }
 
-                            Navigator.push(
+                            Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => OtpVerificationPage(
-                                  email: emailController.text,
-                                ),
+                                builder: (_) => ChangePasswordPage(),
                               ),
                             );
                           },
                           child: const Text(
-                            "Send OTP",
+                            "Verify OTP",
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.white,
@@ -153,18 +173,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
                       const SizedBox(height: 10),
 
-                      // BACK TO LOGIN
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Back to Login",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                      // BACK BUTTON
                     ],
                   ),
                 ),

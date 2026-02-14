@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
+import 'attendance_page.dart';
 import 'profile.dart';
+import 'notice.dart';
+import 'academic_calendar.dart';
 import 'timetable.dart';
-import 'attendance.dart';
-
-/// ================= DASHBOARD MODEL =================
-class DashboardItem {
-  final String title;
-  final IconData icon;
-  final Color color;
-
-  DashboardItem({required this.title, required this.icon, required this.color});
-}
+import 'results.dart';
+import 'user_data.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -20,324 +15,334 @@ class StudentDashboard extends StatefulWidget {
 }
 
 class _StudentDashboardState extends State<StudentDashboard> {
-  int currentIndex = 1;
-
-  /// ================= DYNAMIC DASHBOARD LIST =================
-  final List<DashboardItem> dashboardItems = [
-    DashboardItem(
-      title: "Academic",
-      icon: Icons.school,
-      color: Color(0xFF4CAF50),
-    ),
-    DashboardItem(
-      title: "Assignments",
-      icon: Icons.assignment,
-      color: Color(0xFFFF9800),
-    ),
-    DashboardItem(
-      title: "Timetable",
-      icon: Icons.calendar_month,
-      color: Color(0xFF03A9F4),
-    ),
-    DashboardItem(
-      title: "Results",
-      icon: Icons.emoji_events,
-      color: Color(0xFF9C27B0),
-    ),
-    DashboardItem(
-      title: "Attendance",
-      icon: Icons.percent,
-      color: Color(0xFF009688),
-    ),
-    DashboardItem(
-      title: "Notices",
-      icon: Icons.notifications,
-      color: Color(0xFF607D8B),
-    ),
-    DashboardItem(
-      title: "Events",
-      icon: Icons.event_available,
-      color: Color(0xFFE91E63),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
+    final size = MediaQuery.of(context).size;
 
+    // 🔴 Calculate NEW notice count
+    final int newCount = noticeList.where((n) => n.isNew).length;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F3F7),
       body: Column(
         children: [
           // ================= HEADER =================
           Container(
-            height: 210,
             width: double.infinity,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 12,
+              left: 16,
+              right: 16,
+              bottom: 20,
+            ),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1F5FD9), Color(0xFF5B8DF7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.black,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
               ),
             ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const CircleAvatar(
-                      radius: 34,
-                      backgroundImage: AssetImage("assets/logo1.jpeg"),
+                    const Text(
+                      "MES",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(width: 14),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          "Welcome 👋",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "Jane Cooper",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+
+                    // 🔥 PROFILE IMAGE (Dynamic)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(50),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const StudentProfilePage(),
                           ),
-                        ),
-                        Text(
-                          "Computer Science • 7th Sem",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
+                        ).then((_) {
+                          setState(() {}); // 🔥 refresh
+                        });
+                      },
+                      child: CircleAvatar(
+                        radius: 25,
+                        backgroundImage: UserData.profileImage != null
+                            ? FileImage(UserData.profileImage!)
+                            : const AssetImage("assets/logo1.jpeg")
+                                as ImageProvider,
+                      ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 14),
+                const Text(
+                  "Kartik Sangappa Surpur",
+                  style: TextStyle(
+                    color: Colors.amber,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  "2305112 | kartik@gmail.com",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 18,
+                  runSpacing: 10,
+                  children: const [
+                    InfoItem("Branch", "BCA"),
+                    InfoItem("Sem", "VI"),
+                    InfoItem("Division", "B"),
+                    InfoItem("Roll No.", "12"),
+                    InfoItem("Batch", "2024-25"),
+                  ],
+                ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
 
-          // ================= ATTENDANCE CARD =================
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: AttendanceCard(percentage: 82),
-          ),
-
-          const SizedBox(height: 16),
-
-          // ================= DASHBOARD GRID (SCROLLABLE) =================
+          // ================= GRID =================
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                itemCount: dashboardItems.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+              child: GridView(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: size.width < 360 ? 2 : 3,
+                  mainAxisSpacing: 14,
+                  crossAxisSpacing: 14,
                   childAspectRatio: 0.95,
                 ),
-                itemBuilder: (context, index) {
-                  final item = dashboardItems[index];
-
-                  return GestureDetector(
+                children: [
+                  DashboardCard(
+                    icon: Icons.calendar_month,
+                    title: "Academic Calendar",
+                    color: Colors.blue,
                     onTap: () {
-                      switch (item.title) {
-                        case "Timetable":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TimeTablePage(),
-                            ),
-                          );
-                          break;
-
-                        case "Attendance":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AttendancePage(),
-                            ),
-                          );
-                          break;
-
-                        case "Profile":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StudentProfilePage(),
-                            ),
-                          );
-                          break;
-                      }
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AcademicCalendarPage(),
+                        ),
+                      );
                     },
-                    child: DashboardCard(
-                      icon: item.icon,
-                      title: item.title,
-                      color: item.color,
-                    ),
-                  );
-                },
+                  ),
+
+                  DashboardCard(
+                    icon: Icons.schedule,
+                    title: "Time Table",
+                    color: Colors.teal,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TimeTablePage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  DashboardCard(
+                    icon: Icons.percent,
+                    title: "Attendance",
+                    color: Colors.indigo,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AttendancePage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // 🔴 NOTICE WITH COUNT
+                  DashboardCard(
+                    icon: Icons.notifications,
+                    title: "Notice",
+                    color: Colors.orange,
+                    badgeCount: newCount,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NoticePage(),
+                        ),
+                      ).then((_) {
+                        setState(() {});
+                      });
+                    },
+                  ),
+
+                  DashboardCard(
+                    icon: Icons.bar_chart,
+                    title: "Results",
+                    color: Colors.redAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ResultPage(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  DashboardCard(
+                    icon: Icons.account_balance_wallet,
+                    title: "Fees",
+                    color: Colors.green,
+                    onTap: () {},
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
 
-      // ================= BOTTOM NAV =================
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (i) {
-          setState(() => currentIndex = i);
-          if (i == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const StudentProfilePage(),
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: "Alerts",
+          const SizedBox(height: 10),
+
+          const Text(
+            "App Version : 1.0.1",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+            ),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+
+          const SizedBox(height: 10),
         ],
       ),
     );
   }
 }
 
-// ================= DASHBOARD CARD (WITH HERO) =================
+// ================= INFO ITEM =================
+class InfoItem extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const InfoItem(this.title, this.value, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ================= DASHBOARD CARD =================
 class DashboardCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color color;
+  final VoidCallback onTap;
+  final int badgeCount;
 
   const DashboardCard({
     super.key,
     required this.icon,
     required this.title,
     required this.color,
+    required this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Hero(
-              tag: title, // 🔥 HERO TAG
-              child: Icon(icon, size: 22, color: color),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ================= ATTENDANCE CARD =================
-class AttendanceCard extends StatelessWidget {
-  final int percentage;
-
-  const AttendanceCard({super.key, required this.percentage});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isLow = percentage < 75;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Attendance",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-
-          const SizedBox(height: 10),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "$percentage%",
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F5FD9),
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: color.withOpacity(0.15),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 22,
+                  ),
                 ),
-              ),
-              Text(
-                isLow ? "Low Attendance" : "Good Attendance",
-                style: TextStyle(
-                  color: isLow ? Colors.red : Colors.green,
+                if (badgeCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        badgeCount > 9 ? "9+" : badgeCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: percentage / 100,
-              minHeight: 8,
-              backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isLow ? Colors.red : const Color(0xFF1F5FD9),
-              ),
             ),
-          ),
-
-          const SizedBox(height: 6),
-
-          const Text(
-            "Minimum required attendance: 75%",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

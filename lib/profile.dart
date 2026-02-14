@@ -1,136 +1,183 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'user_data.dart';
 
-class StudentProfilePage extends StatelessWidget {
+class StudentProfilePage extends StatefulWidget {
   const StudentProfilePage({super.key});
+
+  @override
+  State<StudentProfilePage> createState() => _StudentProfilePageState();
+}
+
+class _StudentProfilePageState extends State<StudentProfilePage> {
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+
+  // ================= IMAGE PICK =================
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? picked =
+        await _picker.pickImage(source: source, imageQuality: 80);
+
+    if (picked != null) {
+      setState(() {
+        _image = File(picked.path);
+        UserData.profileImage = _image; // 🔥 SAVE GLOBALLY
+      });
+    }
+    Navigator.pop(context);
+  }
+
+  void _showPicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            const Text(
+              "Add Profile Photo",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Take Photo"),
+              onTap: () => _pickImage(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo),
+              title: const Text("Choose from Gallery"),
+              onTap: () => _pickImage(ImageSource.gallery),
+            ),
+            const SizedBox(height: 10),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
-
+      backgroundColor: const Color(0xFFF2F3F7),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ================= HEADER =================
-            Stack(
-              children: [
-                Container(
-                  height: 210,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1F5FD9), Color(0xFF5B8DF7)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
-                    ),
-                  ),
+            // ================= BLACK HEADER =================
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top,
+                bottom: 20,
+              ),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
-
-                // Back Button
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
+              ),
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
-                ),
 
-                // Profile Avatar
-                Positioned(
-                  bottom: 5,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 42,
-                        backgroundImage: const AssetImage("assets/logo1.jpeg"),
+                  const SizedBox(height: 5),
+
+                  // 🔥 PROFILE IMAGE
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.white,
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage: UserData.profileImage != null
+                              ? FileImage(UserData.profileImage!)
+                              : const AssetImage("assets/logo1.jpeg")
+                                  as ImageProvider,
+                        ),
                       ),
+                      GestureDetector(
+                        onTap: _showPicker,
+                        child: const CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.orange,
+                          child: Icon(Icons.camera_alt,
+                              size: 18, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "Kartik Surpur",
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ],
-            ),
 
-            const SizedBox(height: 25),
+                  const SizedBox(height: 6),
 
-            // ================= NAME =================
-            const Text(
-              "Jane Cooper",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              "Bachelor of Computer Applications",
-              style: TextStyle(color: Colors.grey),
-            ),
-
-            const SizedBox(height: 24),
-
-            // ================= ABOUT =================
-            _sectionCard(
-              title: "About",
-              children: const [
-                _InfoRow("Student ID", "20180212453"),
-                _InfoRow("Semester", "6th (Final Year)"),
-              ],
-            ),
-
-            // ================= ACADEMIC =================
-            _sectionCard(
-              title: "Academic Details",
-              children: const [
-                _InfoRow("Branch", "Computer Science & Engg"),
-                _InfoRow("Roll No", "23"),
-                _InfoRow("Enrollment", "ENR00012345"),
-              ],
-            ),
-
-            // ================= CONTACT =================
-            _sectionCard(
-              title: "Contact Information",
-              children: const [
-                _InfoRow("Email", "janecooper@college.edu"),
-                _InfoRow("Phone", "+91 98765 43210"),
-              ],
-            ),
-            _sectionCard(
-              title: "Parent Details",
-              children: const [
-                _InfoRow("Father Name", "Robert Cooper"),
-                _InfoRow("Father Phone", "+91 98765 43211"),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            // ================= LOGOUT =================
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      "Active",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Logout", style: TextStyle(fontSize: 16)),
-                ),
+                ],
               ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _section(
+              title: "Education Details",
+              icon: Icons.school,
+              children: const [
+                _InfoRow("Branch", "CSE"),
+                _InfoRow("Enrollment No.", "250101010032"),
+                _InfoRow("Division", "CSE - 1"),
+                _InfoRow("Sem | Roll No.", "1 | 32"),
+              ],
+            ),
+
+            _section(
+              title: "Student Contact Details",
+              icon: Icons.person,
+              children: const [
+                _InfoRow("Mobile No.", "8678743423"),
+                _InfoRow("Email", "Kartik@gmail.com"),
+              ],
+            ),
+
+            _section(
+              title: "Parents Contact Details",
+              icon: Icons.people,
+              children: const [
+                _InfoRow("Father Phone", "8967345619"),
+                _InfoRow("Mother Phone", "9765637831"),
+              ],
             ),
 
             const SizedBox(height: 30),
@@ -141,8 +188,9 @@ class StudentProfilePage extends StatelessWidget {
   }
 
   // ================= SECTION CARD =================
-  static Widget _sectionCard({
+  static Widget _section({
     required String title,
+    required IconData icon,
     required List<Widget> children,
   }) {
     return Container(
@@ -152,15 +200,25 @@ class StudentProfilePage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Icon(icon, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           ...children,
@@ -182,10 +240,9 @@ class _InfoRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Text(label, style: const TextStyle(color: Colors.grey)),
-          ),
+          Text(label, style: const TextStyle(color: Colors.grey)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
