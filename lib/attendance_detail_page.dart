@@ -3,112 +3,92 @@ import 'package:flutter/material.dart';
 class AttendanceDetailPage extends StatelessWidget {
   final String subject;
 
-  const AttendanceDetailPage({
-    super.key,
-    required this.subject,
-  });
+  const AttendanceDetailPage({super.key, required this.subject});
 
   @override
   Widget build(BuildContext context) {
-    // Generate 30 days automatically
     List<String> days = List.generate(30, (index) => "${index + 1}/8");
-
-    // Generate attendance data (30 days × 6 slots)
     List<List<String>> data = List.generate(
       30,
-      (day) => List.generate(
-        6,
-        (slot) => (day + slot) % 4 == 0 ? "A" : "P",
-      ),
+      (day) => List.generate(6, (slot) => (day + slot) % 4 == 0 ? "A" : "P"),
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F3F7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
           subject,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 18),
         ),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // HEADER ROW
-              Row(
-                children: [
-                  _headerCell("Date"),
-                  for (int i = 1; i <= 6; i++) _headerCell("S$i"),
-                ],
-              ),
-
-              // DATA ROWS
-              for (int i = 0; i < days.length; i++)
-                Row(
-                  children: [
-                    _dateCell(days[i]),
-                    for (int j = 0; j < 6; j++) _statusCell(data[i][j]),
+      body: Column(
+        children: [
+          // Sub-header for Slots explanation
+          Container(
+            padding: const EdgeInsets.all(12),
+            color: Colors.grey.shade50,
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                SizedBox(width: 8),
+                Text("S1 to S6 represents Daily Lecture Slots",
+                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columnSpacing: 25,
+                  headingRowColor:
+                      MaterialStateProperty.all(Colors.grey.shade100),
+                  columns: [
+                    const DataColumn(
+                        label: Text('Date',
+                            style: TextStyle(fontWeight: FontWeight.bold))),
+                    for (int i = 1; i <= 6; i++)
+                      DataColumn(
+                          label: Text('S$i',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
                   ],
+                  rows: List.generate(days.length, (i) {
+                    return DataRow(cells: [
+                      DataCell(Text(days[i],
+                          style: const TextStyle(fontWeight: FontWeight.w500))),
+                      for (int j = 0; j < 6; j++)
+                        DataCell(_buildStatusIcon(data[i][j])),
+                    ]);
+                  }),
                 ),
-            ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // ================= HEADER CELL =================
-  Widget _headerCell(String text) {
+  Widget _buildStatusIcon(String status) {
+    bool isPresent = status == "P";
     return Container(
-      width: 70,
-      height: 45,
-      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
-        border: Border.all(color: Colors.grey.shade400),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  // ================= DATE CELL =================
-  Widget _dateCell(String text) {
-    return Container(
-      width: 70,
-      height: 45,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Text(text),
-    );
-  }
-
-  // ================= STATUS CELL =================
-  Widget _statusCell(String status) {
-    return Container(
-      width: 70,
-      height: 45,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: status == "P" ? Colors.green.shade100 : Colors.red.shade100,
-        border: Border.all(color: Colors.grey.shade300),
+        color: isPresent
+            ? Colors.green.withOpacity(0.1)
+            : Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         status,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: status == "P" ? Colors.green : Colors.red,
+          color: isPresent ? Colors.green : Colors.red,
         ),
       ),
     );

@@ -71,8 +71,8 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             Container(
               width: double.infinity,
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-                bottom: 20,
+                top: MediaQuery.of(context).padding.top + 1,
+                bottom: 10,
               ),
               decoration: const BoxDecoration(
                 color: Colors.black,
@@ -98,10 +98,10 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                     alignment: Alignment.bottomRight,
                     children: [
                       CircleAvatar(
-                        radius: 55,
+                        radius: 43,
                         backgroundColor: Colors.white,
                         child: CircleAvatar(
-                          radius: 50,
+                          radius: 38,
                           backgroundImage: UserData.profileImage != null
                               ? FileImage(UserData.profileImage!)
                               : const AssetImage("assets/logo1.jpeg")
@@ -111,10 +111,10 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                       GestureDetector(
                         onTap: _showPicker,
                         child: const CircleAvatar(
-                          radius: 18,
+                          radius: 16,
                           backgroundColor: Colors.orange,
                           child: Icon(Icons.camera_alt,
-                              size: 18, color: Colors.white),
+                              size: 16, color: Colors.white),
                         ),
                       ),
                     ],
