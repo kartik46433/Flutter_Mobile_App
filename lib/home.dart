@@ -6,6 +6,7 @@ import 'academic_calendar.dart';
 import 'timetable.dart';
 import 'results.dart';
 import 'user_data.dart';
+import 'notice_page.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
