@@ -106,7 +106,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
                     InfoItem("Branch", "BCA"),
                     InfoItem("Sem", "VI"),
                     InfoItem("Division", "B"),
-                    InfoItem("Roll No.", "12"),
+                    InfoItem("Roll No.", "2305112"),
                     InfoItem("Batch", "2024-25"),
                   ],
                 ),

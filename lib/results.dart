@@ -64,6 +64,158 @@ class _ResultPageState extends State<ResultPage> {
     return data.map((e) => SubjectResult.fromJson(e)).toList();
   }
 
+  // ---------------- UI ----------------
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Column(
+        children: [
+          // ================= SLIM CUSTOM HEADER =================
+          _buildHeader(context),
+
+          Expanded(
+            child: FutureBuilder<List<SubjectResult>>(
+              future: futureResult,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                final list = snapshot.data!;
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      studentHeaderUI(),
+                      const SizedBox(height: 12),
+                      resultTableUI(list),
+                      const SizedBox(height: 12),
+                      summaryCardUI(),
+                      const SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        onPressed: () => downloadPdf(list),
+                        icon: const Icon(Icons.download),
+                        label: const Text("Download PDF"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SLIM HEADER METHOD
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 5,
+        left: 4,
+        right: 15,
+        bottom: 5,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.black,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const Text(
+            "Semester Result",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20, // Reduced font size
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- UI WIDGETS ---
+  Widget studentHeaderUI() {
+    return const Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(15))),
+      child: ListTile(
+        title: Text("Kartik Sangappa Surpur",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text("Roll: 2305112 | BCA | Semester III"),
+      ),
+    );
+  }
+
+  Widget resultTableUI(List<SubjectResult> list) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Table(
+        border: TableBorder.all(color: Colors.grey.shade200),
+        children: [
+          const TableRow(
+            decoration: BoxDecoration(color: Color(0xFFF1F5F9)),
+            children: [
+              _CellUI("SUB", b: true),
+              _CellUI("ISA", b: true),
+              _CellUI("SEE", b: true),
+              _CellUI("TH", b: true),
+              _CellUI("PR", b: true),
+              _CellUI("TOT", b: true),
+              _CellUI("GR", b: true),
+            ],
+          ),
+          ...list.map((r) => TableRow(
+                children: [
+                  _CellUI(r.code),
+                  _CellUI(r.isa.toString()),
+                  _CellUI(r.see.toString()),
+                  _CellUI(r.theory.toString()),
+                  _CellUI(r.practical.toString()),
+                  _CellUI(r.total.toString()),
+                  _CellUI(r.grade),
+                ],
+              ))
+        ],
+      ),
+    );
+  }
+
+  Widget summaryCardUI() {
+    return Card(
+      color: Colors.blueAccent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _SumUI("SGPA", "8.30"),
+            _SumUI("CGPA", "6.86"),
+            _SumUI("RESULT", "PASS"),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ---------------- MODERN PDF DOWNLOAD ----------------
   Future<void> downloadPdf(List<SubjectResult> list) async {
     final pdf = pw.Document();
@@ -76,7 +228,6 @@ class _ResultPageState extends State<ResultPage> {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Header
               pw.Container(
                 padding:
                     const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -98,8 +249,6 @@ class _ResultPageState extends State<ResultPage> {
                 ),
               ),
               pw.SizedBox(height: 20),
-
-              // Student Info
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -110,8 +259,6 @@ class _ResultPageState extends State<ResultPage> {
                 ],
               ),
               pw.SizedBox(height: 20),
-
-              // Table
               pw.Table(
                 border:
                     pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
@@ -143,8 +290,6 @@ class _ResultPageState extends State<ResultPage> {
                 ],
               ),
               pw.SizedBox(height: 30),
-
-              // Result Summary
               pw.Container(
                 padding: const pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
@@ -165,7 +310,7 @@ class _ResultPageState extends State<ResultPage> {
       ),
     );
 
-    // Save to device
+    // Note: Ensure permissions are handled for Android 10+
     final file = File("/storage/emulated/0/Download/result.pdf");
     await file.writeAsBytes(await pdf.save());
 
@@ -176,8 +321,7 @@ class _ResultPageState extends State<ResultPage> {
     }
   }
 
-  // --- PDF HELPER METHODS (Must be inside _ResultPageState) ---
-
+  // --- PDF HELPERS ---
   pw.Widget _pdfInfoLabel(String label, String value) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -222,108 +366,6 @@ class _ResultPageState extends State<ResultPage> {
       ],
     );
   }
-
-  // ---------------- UI ----------------
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: const Text("Semester Result"),
-          foregroundColor: Colors.white,
-          backgroundColor: const Color.fromARGB(255, 0, 0, 0)),
-      body: FutureBuilder<List<SubjectResult>>(
-        future: futureResult,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return const Center(child: CircularProgressIndicator());
-          final list = snapshot.data!;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                studentHeaderUI(),
-                const SizedBox(height: 12),
-                resultTableUI(list),
-                const SizedBox(height: 12),
-                summaryCardUI(),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  onPressed: () => downloadPdf(list),
-                  icon: const Icon(Icons.download),
-                  label: const Text("Download PDF"),
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50)),
-                )
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // --- UI WIDGETS ---
-  Widget studentHeaderUI() {
-    return const Card(
-      child: ListTile(
-        title: Text("Kartik Sangappa Surpur",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text("Roll: 2305112 | BCA | Semester III"),
-      ),
-    );
-  }
-
-  Widget resultTableUI(List<SubjectResult> list) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Table(
-        border: TableBorder.all(color: Colors.grey.shade300),
-        children: [
-          const TableRow(
-            decoration: BoxDecoration(color: Color(0xFFE3F2FD)),
-            children: [
-              _CellUI("SUB", b: true),
-              _CellUI("ISA", b: true),
-              _CellUI("SEE", b: true),
-              _CellUI("TH", b: true),
-              _CellUI("PR", b: true),
-              _CellUI("TOT", b: true),
-              _CellUI("GR", b: true),
-            ],
-          ),
-          ...list.map((r) => TableRow(
-                children: [
-                  _CellUI(r.code),
-                  _CellUI(r.isa.toString()),
-                  _CellUI(r.see.toString()),
-                  _CellUI(r.theory.toString()),
-                  _CellUI(r.practical.toString()),
-                  _CellUI(r.total.toString()),
-                  _CellUI(r.grade),
-                ],
-              ))
-        ],
-      ),
-    );
-  }
-
-  Widget summaryCardUI() {
-    return const Card(
-      color: Colors.blue,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _SumUI("SGPA", "8.30"),
-            _SumUI("CGPA", "6.86"),
-            _SumUI("RESULT", "PASS"),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 // Simple internal helpers for the UI part
@@ -337,7 +379,8 @@ class _CellUI extends StatelessWidget {
       child: Center(
           child: Text(t,
               style: TextStyle(
-                  fontWeight: b ? FontWeight.bold : FontWeight.normal))));
+                  fontWeight: b ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 13))));
 }
 
 class _SumUI extends StatelessWidget {

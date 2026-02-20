@@ -14,10 +14,10 @@ class _TimeTablePageState extends State<TimeTablePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD), // Slightly cleaner white/blue
+      backgroundColor: const Color(0xFFF8F9FD),
       body: Column(
         children: [
-          // ================= MODERN HEADER =================
+          // ================= HEADER WITH DEFAULT ARROW =================
           _buildHeader(context),
 
           const SizedBox(height: 15),
@@ -27,7 +27,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
 
           const SizedBox(height: 10),
 
-          // ================= TIMETABLE LIST =================
           // ================= TIMETABLE LIST =================
           Expanded(
             child: ListView(
@@ -74,7 +73,6 @@ class _TimeTablePageState extends State<TimeTablePage> {
                   icon: Icons.storage,
                 ),
 
-                // Optional: Add a "Day End" marker
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
@@ -98,48 +96,28 @@ class _TimeTablePageState extends State<TimeTablePage> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 1,
-        left: 20,
+        top: MediaQuery.of(context).padding.top + 5,
+        left: 8, // Reduced left padding for the default IconButton
         right: 20,
-        bottom: 17,
+        bottom: 5,
       ),
       decoration: const BoxDecoration(
         color: Colors.black,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(0),
-          bottomRight: Radius.circular(0),
-        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.arrow_back_ios_new,
-                      color: Colors.white, size: 20),
-                ),
-              ),
-              const SizedBox(width: 15),
-              const Text(
-                "Semester VI",
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-            ],
+          // DEFAULT BACK BUTTON
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(
+              width: 4), // Minimal space as IconButton has its own padding
           const Text(
             "Time Table",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 28,
+              fontSize: 23,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -221,7 +199,6 @@ class ModernTimeCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Timeline indicator
         Column(
           children: [
             Text(time.split(" ")[0],
@@ -323,7 +300,7 @@ class RecessCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(width: 45), // Match timeline width
+        const SizedBox(width: 45),
         Expanded(
           child: Container(
             margin: const EdgeInsets.only(bottom: 20),

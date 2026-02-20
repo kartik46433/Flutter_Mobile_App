@@ -15,16 +15,11 @@ class AttendanceDetailPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          subject,
-          style: const TextStyle(color: Colors.white, fontSize: 18),
-        ),
-      ),
       body: Column(
         children: [
+          // ================= SLIM CUSTOM HEADER =================
+          _buildHeader(context),
+
           // Sub-header for Slots explanation
           Container(
             padding: const EdgeInsets.all(12),
@@ -39,6 +34,7 @@ class AttendanceDetailPage extends StatelessWidget {
               ],
             ),
           ),
+
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
@@ -66,6 +62,44 @@ class AttendanceDetailPage extends StatelessWidget {
                     ]);
                   }),
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SLIM HEADER METHOD
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + 5,
+        left: 4, // Minimal padding for tight arrow-to-text spacing
+        right: 15,
+        bottom: 5,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.black,
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
+            onPressed: () => Navigator.pop(context),
+          ),
+          Expanded(
+            // Added Expanded to handle long subject names
+            child: Text(
+              subject,
+              overflow: TextOverflow
+                  .ellipsis, // Prevents overflow if subject name is very long
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20, // Reduced font size
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
